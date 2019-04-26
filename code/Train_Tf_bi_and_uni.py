@@ -9,14 +9,14 @@ from model import create_tensorflow_model
 p = Pocessor("")
 
 print("Loading Datasets...")
-uni_train_x = np.load("./Processed_Train/train_unis.npy")
-uni_dev_x = np.load("./Processed_Dev/dev_unis.npy")
+uni_train_x = np.load("./Processed_Train/Train_unis.npy")
+uni_dev_x = np.load("./Processed_Dev/Dev_unis.npy")
 
-bi_train_x = np.load("./Processed_Train/train_bis.npy")
-bi_dev_x = np.load("./Processed_Dev/dev_bis.npy")
+bi_train_x = np.load("./Processed_Train/Train_bis.npy")
+bi_dev_x = np.load("./Processed_Dev/Dev_bis.npy")
 
-pad_train_y = np.load("./Processed_Train/train_labels.npy")
-pad_dev_y = np.load("./Processed_Dev/dev_labels.npy")
+pad_train_y = np.load("./Processed_Train/Train_labels.npy")
+pad_dev_y = np.load("./Processed_Dev/Dev_labels.npy")
 
 print("Done!")
 
