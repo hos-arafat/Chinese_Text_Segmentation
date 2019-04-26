@@ -59,7 +59,7 @@ def add_summary(writer, name, value, global_step):
      writer.add_summary(summary, global_step=global_step)
 
 
-epochs = 5
+epochs = 10
 batch_size = 300
 print("\nLength of my TRAINING set is {:} & Batch size is {:}: ".format(len(uni_train_x), batch_size))
 n_iterations = int(np.ceil(len(uni_train_x)/batch_size))
