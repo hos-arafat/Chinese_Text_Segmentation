@@ -16,9 +16,6 @@ class Pocessor:
 
         self.mode = m
 
-        # self.uni_vocab = None
-        # self.bi_vocab = None
-
         print("Creating Necessary Files & Folders")
         folder = "./Processed_" + self.mode
         if not os.path.exists(folder):
