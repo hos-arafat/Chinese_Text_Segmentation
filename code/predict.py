@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 
-from preprocess_Class import Pocessor
+from preprocess import Pocessor
 from model import create_tensorflow_model
 
 def pre_process_test(input_path):

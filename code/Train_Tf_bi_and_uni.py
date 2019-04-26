@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
-from preprocess_Class import Pocessor
+from preprocess import Pocessor
 from model import create_tensorflow_model
 
 p = Pocessor("")
