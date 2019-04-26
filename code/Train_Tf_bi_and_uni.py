@@ -3,32 +3,37 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
+from preprocess_Class import Pocessor
 from model import create_tensorflow_model
 
+p = Pocessor("")
 
+print("Loading Datasets...")
 uni_train_x = np.load("./Processed_Train/train_unis.npy")
 uni_dev_x = np.load("./Processed_Dev/dev_unis.npy")
-print("Input Unigram data shape is ", uni_train_x.shape)
-print("DEV Unigram data shape is ", uni_dev_x.shape)
 
 bi_train_x = np.load("./Processed_Train/train_bis.npy")
 bi_dev_x = np.load("./Processed_Dev/dev_bis.npy")
-print("Input Bigram data shape is ", bi_train_x.shape)
-print("DEV Bigram data shape is ", bi_dev_x.shape)
 
-pad_train_y = np.load("./Processed_Train/train_padded_labels.npy")
-pad_dev_y = np.load("./Processed_Dev/dev_padded_labels.npy")
-print("Training Labels shape is ", pad_train_y.shape)
-print("Dev Labels data shape is ", pad_dev_y.shape)
+pad_train_y = np.load("./Processed_Train/train_labels.npy")
+pad_dev_y = np.load("./Processed_Dev/dev_labels.npy")
 
-print("Entire UNIGRAM input dataset ", uni_train_x.shape)
-print("Entire BIGRAM dataset ", bi_train_x.shape)
-print("Training set {:} = Labels {:}: ".format(uni_train_x.shape, pad_train_y.shape))
+print("Done!")
 
-#DEFINE SOME COSTANTS
+assert uni_train_x.shape == bi_train_x.shape == pad_train_y.shape, "Train Shapes are not equal"
+assert uni_dev_x.shape == bi_dev_x.shape == pad_dev_y.shape, "Dev Shapes are not equal"
+
+print("Training set {:} = Training set Bigrams {:} = Labels {:}: ".format(uni_train_x.shape, pad_train_y.shape, pad_train_y.shape))
+print("Dev set Unigrams {:} = Dev set Bigrams {:} = Labels {:}: ".format(uni_dev_x.shape, bi_dev_x.shape, pad_dev_y.shape))
+
+# DEFINE SOME COSTANTS
 MAX_LENGTH = 80
-U_VOCAB_SIZE = 6592
-B_VOCAB_SIZE = 1042976
+
+U_VOCAB_SIZE = len(p.load_unigram_dict())
+B_VOCAB_SIZE = len(p.load_bigram_dict())
+# U_VOCAB_SIZE = 6592
+# B_VOCAB_SIZE = 1042976
+
 print("\nUnigram Vocab size is ", U_VOCAB_SIZE)
 print("Bigram Vocab size is ", B_VOCAB_SIZE)
 EMBEDDING_SIZE = 32
