@@ -3,19 +3,28 @@ import tensorflow as tf
 import numpy as np
 import os
 
+from preprocess_Class import Pocessor
 from model import create_tensorflow_model
 
 def pre_process_test(input_path):
     print("Processing Test file....")
-    var = input_path
-    os.system(r'python preprocess.py Test ' + var)
 
-    u_test_batch = np.load("./Processed_Test/test_unis.npy")
+    p = Pocessor("Test")
+    p.no_sp_pth = input_path
+    p.map_n_grams()
+    p.create_unigram_data()
+    p.create_bigram_data()
+
+    U_VOCAB_SIZE = len(p.load_unigram_dict())
+    B_VOCAB_SIZE = len(p.load_bigram_dict())
+    print("\nUnigram Vocab size is ", U_VOCAB_SIZE)
+    print("Bigram Vocab size is ", B_VOCAB_SIZE)
+
+    u_test_batch = np.load(p.uni_np_pth)
+    b_test_batch = np.load(p.bi_np_pth)
 
     count = np.count_nonzero(u_test_batch, axis=1)
     count = np.insert(count, 0, 0)
-
-    b_test_batch = np.load("./Processed_Test/test_bis.npy")
 
     return u_test_batch, b_test_batch, count
 
@@ -44,25 +53,25 @@ def predict(input_path, output_path, resources_path):
     :param resources_path: the path of the resources folder containing your model and stuff you might need.
     :return: None
     """
-    n = 80
+    MAX_LENGTH = 80
+
     restore_list = []
-    splited = open(r"./cut_input.txt", "w", encoding="utf8")
+    splited = open(r"./Processed_Test/cut_input.txt", "w", encoding="utf8")
     with open(input_path, "r", encoding="utf8") as f:
         f_content = f.read()
         for l_idx, line in enumerate(f_content.splitlines()):
-            restore_list.append((l_idx, int(np.ceil(len(line)/n)-1)))
+            restore_list.append((l_idx, int(np.ceil(len(line)/MAX_LENGTH)-1)))
             line = list(line)
             line.append("</s>")
 
-        list_line = [line[i:i+n] for line in f_content.splitlines() for i in range(0, len(line), n)]
+        list_line = [line[i:i+MAX_LENGTH] for line in f_content.splitlines() for i in range(0, len(line), MAX_LENGTH)]
         for l in list_line:
             splited.write(l)
             splited.write("\n")
         splited.close()
 
-    u_test_batch, b_test_batch, count = pre_process_test(r"./cut_input.txt")
+    u_test_batch, b_test_batch, count = pre_process_test(r"./Processed_Test/cut_input.txt")
 
-    MAX_LENGTH = 80
     U_VOCAB_SIZE = 6592
     B_VOCAB_SIZE = 1042976
 
@@ -82,7 +91,7 @@ def predict(input_path, output_path, resources_path):
 
         print("Reconstructing the Network's Prediction....")
         read = {0: "B", 1: "I", 2: "E", 3: "S"}
-        c_op_file = open("./cut_output.txt", "w")
+        c_op_file = open("./Processed_Test/cut_output.txt", "w")
         reconst = []
         for c_idx in range(len(count)-1):
             # print("Len of this line is ", count[idx+1])
@@ -97,7 +106,7 @@ def predict(input_path, output_path, resources_path):
 
     print("\n")
     op_file = open(output_path, "w")
-    with open("./cut_output.txt", "r", encoding="utf8") as f:
+    with open("./Processed_Test/cut_output.txt", "r", encoding="utf8") as f:
         op_content = f.read().splitlines()
         for i in range(len(restore_list)):
                 # print("{:} << We will add {:} lines to this".format(op_content[i], restore_list[i][1]))
