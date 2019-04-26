@@ -12,28 +12,49 @@ def parse_args():
     return parser.parse_args()
 
 class Pocessor:
-    def __init__(mode, parent):
+    def __init__(self, m):
 
-        self.mode = mode
-        self.parent = parent_path
+        self.mode = m
 
-    def create_groundtruth(parent):
+        # self.uni_vocab = None
+        # self.bi_vocab = None
+
+        print("Creating Necessary Files & Folders")
+        folder = "./Processed_" + self.mode
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        self.no_sp_pth = os.path.join(folder, (self.mode + "_no_spaces.utf8"))
+
+        self.uni_dict_pth = os.path.join("./Processed_Train", "unigrams_dictionary.pickle")
+        self.bi_dict_pth  =  os.path.join("./Processed_Train", "bigrams_dictionary.pickle")
+
+        self.u2i_pth  =  os.path.join(folder, (self.mode + "_unis.txt"))
+        self.uni_np_pth  =  os.path.join(folder, (self.mode + "_unis.npy"))
+
+        self.b2i_pth  =  os.path.join(folder, (self.mode + "_bis.txt"))
+        self.bi_np_pth  =  os.path.join(folder, (self.mode + "_bis.npy"))
+
+        if self.mode == ("Train") or self.mode == ("Dev"):
+            self.label_file_pth = os.path.join(folder, (self.mode + "_labels.txt"))
+            self.num_lables_pth = os.path.join(folder, (self.mode + "_numerical_labels.txt"))
+            self.lbl_np_pth  =  os.path.join(folder, (self.mode + "_labels.npy"))
+
+    def create_groundtruth(self, parent_path):
         if self.mode == ("Train"):
             sub = "training"
+            files = ["pku_training.utf8", "cityu_training.utf8", "msr_training.utf8", "as_training.utf8"]
             files = ["pku_training.utf8", "cityu_training.utf8", "msr_training.utf8", "as_training.utf8"]
         elif self.mode == ("Dev"):
             sub = "gold"
             files = ["pku_test_gold.utf8"] #, "msr_test_gold.utf8"]
-        elif self.mode ==("Test"):
-            files = parent
-            print(parent)
 
-        print("{:} Dataset will be built from the following files {:}...".format(mode, files))
+        print("{:} Dataset will be built from the following files {:}...".format(self.mode, files))
         print()
 
-        no_sp = open(no_sp_pth , "w", encoding="utf8")
-        label_file = open(label_file_pth , "w")
-        num_lables = open(num_lables_pth , "w")
+        no_sp = open(self.no_sp_pth , "w", encoding="utf8")
+        label_file = open(self.label_file_pth , "w")
+        num_lables = open(self.num_lables_pth , "w")
 
         for idx, file in enumerate(files):
             with open((os.path.join(parent, sub, file)), 'r', encoding='utf-8') as f:
@@ -68,9 +89,9 @@ class Pocessor:
         no_sp.close()
 
 
-    def create_unigram_dict():
+    def create_unigram_dict(self):
         uni_list = []
-        with open(no_sp_pth, "r", encoding="utf8") as f:
+        with open(self.no_sp_pth, "r", encoding="utf8") as f:
             f_content = f.read()
             print("\nCreating the Unigram dictionary....")
             unigrams = [b for l in f_content.splitlines() for b in l]
@@ -79,16 +100,17 @@ class Pocessor:
         unigrams_d["PAD"] = 0
         unigrams_d["UNK"] = 1
         print("We have " + str(len(unigrams_d)) + " unique Unigrams (including the PAD and UNK)")
-        with open(uni_dict_pth, "wb") as handle:
+        self.uni_vocab = len(unigrams_d)
+        with open(self.uni_dict_pth, "wb") as handle:
             pickle.dump(unigrams_d, handle, protocol=pickle.HIGHEST_PROTOCOL)
         print("Done Saving the Unigram dictionary!")
         print("\n")
         return unigrams_d
 
-    def create_bigram_dict():
+    def create_bigram_dict(self):
         bi = []
         print("Creating the Bigram dictionary....")
-        with open(no_sp_pth, "r", encoding="utf8") as f:
+        with open(self.no_sp_pth, "r", encoding="utf8") as f:
             f_content = f.read()
         for line in f_content.splitlines():
             line = list(line)
@@ -102,36 +124,41 @@ class Pocessor:
         bigrams_d["PAD"] = 0
         bigrams_d["UNK"] = 1
         print("We have " + str(len(bigrams_d)) + " unique Bigrams (including the PAD, UNK)")
-        with open(bi_dict_pth, 'wb') as handle:
+        self.bi_vocab  = len(bigrams_d)
+        with open(self.bi_dict_pth, 'wb') as handle:
             pickle.dump(bigrams_d, handle, protocol=pickle.HIGHEST_PROTOCOL)
         print("Done Saving the Bigram dictionary!")
         return bigrams_d
 
-    def load_unigram_dict():
-        with open(uni_dict_pth, 'rb') as handle:
+    def load_unigram_dict(self):
+        assert os.path.exists(self.uni_dict_pth), "Training Dictionary does not exist"
+        with open(self.uni_dict_pth, 'rb') as handle:
             unigrams_d = pickle.load(handle)
         print("Done Loading the Unigram dictionary!")
+        uni_vocab  = len(unigrams_d)
         return unigrams_d
 
-    def load_bigram_dict():
-        with open(bi_dict_pth, 'rb') as handle:
+    def load_bigram_dict(self):
+        assert os.path.exists(self.uni_dict_pth), "Training Dictionary does not exist"
+        with open(self.bi_dict_pth, 'rb') as handle:
             bigrams_d = pickle.load(handle)
         print("Done Loading the Bigram dictionary!")
+        bi_vocab  = len(bigrams_d)
         return bigrams_d
 
 
-    def map_n_grams():
-        if mode == ("Train"):
-            unigrams_d = create_unigram_dict()
-            bigrams_d = create_bigram_dict()
-        elif mode == ("Dev") or ("Test"):
-            unigrams_d = load_unigram_dict()
-            bigrams_d  = load_bigram_dict()
+    def map_n_grams(self):
+        if self.mode == ("Train"):
+            unigrams_d = self.create_unigram_dict()
+            bigrams_d = self.create_bigram_dict()
+        elif self.mode == ("Dev") or ("Test"):
+            unigrams_d = self.load_unigram_dict()
+            bigrams_d  = self.load_bigram_dict()
 
-        u2i = open(u2i_pth, "w")
-        b2i = open(b2i_pth, "w")
+        u2i = open(self.u2i_pth, "w")
+        b2i = open(self.b2i_pth, "w")
 
-        with open(no_sp_pth, 'r', encoding='utf8') as f:
+        with open(self.no_sp_pth, 'r', encoding='utf8') as f:
             f_content_3 = f.read()
             for u_line in f_content_3.splitlines():
                 for idx in range(len(u_line)):
@@ -157,41 +184,41 @@ class Pocessor:
         print("\nDone Creating N-grams (Unigram & Bigram) map!")
 
 
-    def create_unigram_data():
+    def create_unigram_data(self):
         to_b_pad_uni_data = []
 
-        with open(u2i_pth, 'r') as file:
+        with open(self.u2i_pth, 'r') as file:
             for sentence in file.readlines():
                 line = sentence.rstrip().split(',')
                 del(line[-1])
-                if mode == ("Train"):
+                if self.mode == ("Train"):
                     if len(line) >= 80:
                         line = line[:80]
-                elif mode == ("Dev"):
+                elif self.mode == ("Dev"):
                     if len(line) >= 80:
                         line = line[:80]
                 line = list(map(int, line))
                 to_b_pad_uni_data.append(line)
 
         length = max(map(len, to_b_pad_uni_data))
-        print("\nCreating {:} Unigrams Numpy array....".format(mode))
+        print("\nCreating {:} Unigrams Numpy array....".format(self.mode))
         padded_uni_training = np.array([xi+[0]*(length-len(xi)) for xi in to_b_pad_uni_data])
-        print("Done Creating {:} Unigrams Numpy array!".format(mode))
-        print("Saving {:} Unigrams Numpy array....".format(mode))
-        np.save(uni_np_pth, padded_uni_training)
-        print("Done !\nPadded UNIGRAM Input {:} data is: {:}".format(mode, padded_uni_training.shape))
+        print("Done Creating {:} Unigrams Numpy array!".format(self.mode))
+        print("Saving {:} Unigrams Numpy array....".format(self.mode))
+        np.save(self.uni_np_pth, padded_uni_training)
+        print("Done !\nPadded UNIGRAM Input {:} data is: {:}".format(self.mode, padded_uni_training.shape))
 
-    def create_bigram_data():
+    def create_bigram_data(self):
         to_b_pad_bi_data = []
 
-        with open(b2i_pth, 'r') as file:
+        with open(self.b2i_pth, 'r') as file:
             for sentence in file.readlines():
                 line = sentence.rstrip().split(',')
                 del(line[-1])
-                if mode == ("Train"):
+                if self.mode == ("Train"):
                     if len(line) >= 80:
                         line = line[:80]
-                elif mode == ("Dev"):
+                elif self.mode == ("Dev"):
                     if len(line) >= 80:
                         line = line[:80]
                 line = list(map(int, line))
@@ -199,17 +226,17 @@ class Pocessor:
 
 
         length = max(map(len, to_b_pad_bi_data))
-        print("\nCreating {:} Bigrams Numpy array....".format(mode))
+        print("\nCreating {:} Bigrams Numpy array....".format(self.mode))
         padded_bi_training = np.array([xi+[0]*(length-len(xi)) for xi in to_b_pad_bi_data])
-        print("Done Creating {:} Bigrams Numpy array!".format(mode))
+        print("Done Creating {:} Bigrams Numpy array!".format(self.mode))
 
-        print("Saving {:} Bigrams Numpy array....".format(mode))
-        np.save(bi_np_pth, padded_bi_training)
-        print("Done !\nPadded BIGRAM Input {:} data is: {:}".format(mode, padded_bi_training.shape))
+        print("Saving {:} Bigrams Numpy array....".format(self.mode))
+        np.save(self.bi_np_pth, padded_bi_training)
+        print("Done !\nPadded BIGRAM Input {:} data is: {:}".format(self.mode, padded_bi_training.shape))
 
-    def create_label_data():
+    def create_label_data(self):
         padded_cls = []
-        with open(num_lables_pth, 'r') as file:
+        with open(self.num_lables_pth, 'r') as file:
             for line in file.readlines():
                 if len(line) >= 80:
                     line = line[:80]
@@ -220,49 +247,24 @@ class Pocessor:
         length = max(map(len, padded_cls))
         padded_cls = np.array([xi+[0]*(length-len(xi)) for xi in padded_cls])
 
-        print("\nNON One-hot, {:} Label data's shape is: {:}".format(mode, padded_cls.shape))
-        print("Type of each element in Padded_cls", type(padded_cls[0]))
+        print("\nNON One-hot, {:} Label data's shape is: {:}".format(self.mode, padded_cls.shape))
 
         print("Saving Unigrams Numpy array....")
-        np.save(lbl_np_pth, padded_cls)
-        print("Done !\nPadded Training Labels data is: ", padded_cls.shape)
+        np.save(self.lbl_np_pth, padded_cls)
+        print("Done !\nPadded {:} Labels data is: {:}".format(self.mode, padded_cls.shape))
 
 
 if __name__ == '__main__':
     args = parse_args()
-    mode = args.mode
-    parent = args.parent_path
-    folder = "./Processed_" + mode
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    # mode = args.mode
+    # parent = args.parent_path
 
-    u2i_pth  =  os.path.join(folder, (mode + "_unis.txt"))
-    uni_np_pth  =  os.path.join(folder, (mode + "_unis.npy"))
-    b2i_pth  =  os.path.join(folder, (mode + "_bis.txt"))
-    bi_np_pth  =  os.path.join(folder, (mode + "_bis.npy"))
+    p = Pocessor(args.mode)
 
-    label_file_pth = os.path.join(folder, (mode + "_labels.txt"))
-    num_lables_pth = os.path.join(folder, (mode + "_numerical_labels.txt"))
-    lbl_np_pth  =  os.path.join(folder, (mode + "_labels.npy"))
-    uni_dict_pth = os.path.join("./Processed_Train", "unigrams_dictionary.pickle")
-    bi_dict_pth  =  os.path.join("./Processed_Train", "bigrams_dictionary.pickle")
+    if args.mode == ("Train") or args.mode == ("Dev"):
 
-    if mode == ("Train"):
-        no_sp_pth = os.path.join(folder, (mode + "_no_spaces.utf8"))
-        create_groundtruth(parent)
-        map_n_grams()
-        create_unigram_data()
-        create_bigram_data()
-        create_label_data()
-    elif mode == ("Dev"):
-        no_sp_pth = os.path.join(folder, (mode + "_no_spaces.utf8"))
-        create_groundtruth(parent)
-        map_n_grams()
-        create_unigram_data()
-        create_bigram_data()
-        create_label_data()
-    elif mode == ("Test"):
-        no_sp_pth = parent
-        map_n_grams()
-        create_unigram_data()
-        create_bigram_data()
+        p.create_groundtruth(args.parent_path)
+        p.map_n_grams()
+        p.create_unigram_data()
+        p.create_bigram_data()
+        p.create_label_data()
