@@ -40,7 +40,7 @@ class Pocessor:
             self.num_lables_pth = os.path.join(folder, (self.mode + "_numerical_labels.txt"))
             self.lbl_np_pth  =  os.path.join(folder, (self.mode + "_labels.npy"))
 
-    def create_groundtruth(self, parent_path):
+    def create_groundtruth(self, parent):
         if self.mode == ("Train"):
             sub = "training"
             files = ["pku_training.utf8", "cityu_training.utf8", "msr_training.utf8", "as_training.utf8"]
