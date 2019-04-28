@@ -1,3 +1,7 @@
-# hossam_arafat_1803850_nlp19hw1
+# Usage Instructions:
 
-My submission to the Chinese Segmentation Assignment
+## Preprocess the data:
+
+## Train the Network:
+
+## Test the Network's performance:
