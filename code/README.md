@@ -1,7 +1,7 @@
 # Usage Instructions:
 
-## Preprocess the data:
+#### Preprocess the data:
 
-## Train the Network:
+#### Train the Network:
 
-## Test the Network's performance:
+#### Test the Network's performance:
