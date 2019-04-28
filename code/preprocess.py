@@ -16,31 +16,37 @@ class Pocessor:
 
         self.mode = m
 
-        print("Creating Necessary Files & Folders")
-        folder = "./Processed_" + self.mode
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-
-        self.no_sp_pth = os.path.join(folder, (self.mode + "_no_spaces.utf8"))
-
         self.uni_dict_pth = os.path.join("./Processed_Train", "unigrams_dictionary.pickle")
         self.bi_dict_pth  =  os.path.join("./Processed_Train", "bigrams_dictionary.pickle")
 
-        self.u2i_pth  =  os.path.join(folder, (self.mode + "_unis.txt"))
-        self.uni_np_pth  =  os.path.join(folder, (self.mode + "_unis.npy"))
+        if m == (""):
+            pass
+        else:
+            print("Creating Necessary Files & Folders")
+            folder = "./Processed_" + self.mode
+            if not os.path.exists(folder):
+                os.makedirs(folder)
 
-        self.b2i_pth  =  os.path.join(folder, (self.mode + "_bis.txt"))
-        self.bi_np_pth  =  os.path.join(folder, (self.mode + "_bis.npy"))
+            self.no_sp_pth = os.path.join(folder, (self.mode + "_no_spaces.utf8"))
 
-        if self.mode == ("Train") or self.mode == ("Dev"):
-            self.label_file_pth = os.path.join(folder, (self.mode + "_labels.txt"))
-            self.num_lables_pth = os.path.join(folder, (self.mode + "_numerical_labels.txt"))
-            self.lbl_np_pth  =  os.path.join(folder, (self.mode + "_labels.npy"))
+            # self.uni_dict_pth = os.path.join("./Processed_Train", "unigrams_dictionary.pickle")
+            # self.bi_dict_pth  =  os.path.join("./Processed_Train", "bigrams_dictionary.pickle")
+
+            self.u2i_pth  =  os.path.join(folder, (self.mode + "_unis.txt"))
+            self.uni_np_pth  =  os.path.join(folder, (self.mode + "_unis.npy"))
+
+            self.b2i_pth  =  os.path.join(folder, (self.mode + "_bis.txt"))
+            self.bi_np_pth  =  os.path.join(folder, (self.mode + "_bis.npy"))
+
+            if self.mode == ("Train") or self.mode == ("Dev"):
+                self.label_file_pth = os.path.join(folder, (self.mode + "_labels.txt"))
+                self.num_lables_pth = os.path.join(folder, (self.mode + "_numerical_labels.txt"))
+                self.lbl_np_pth  =  os.path.join(folder, (self.mode + "_labels.npy"))
 
     def create_groundtruth(self, parent):
         if self.mode == ("Train"):
             sub = "training"
-            files = ["pku_training.utf8", "cityu_training.utf8", "msr_training.utf8", "as_training.utf8"]
+            # files = ["pku_training.utf8"] # , "cityu_training.utf8", "msr_training.utf8", "as_training.utf8"]
             files = ["pku_training.utf8", "cityu_training.utf8", "msr_training.utf8", "as_training.utf8"]
         elif self.mode == ("Dev"):
             sub = "gold"
