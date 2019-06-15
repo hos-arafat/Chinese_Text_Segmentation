@@ -1,4 +1,7 @@
-# Safe Reinforcement Learning Via Shielding (Pacman Environment)
+# Safe Reinforcement Learning Via Shielding
+This code implementation accompanies the presentation of the paper "Safe Reinforcement Learning Via Shielding" (2018 by Alshiekh et. al)
+
+# Pacman Environment Jupyter Notebook by Karim Ghonim (1774086) & Hossam Arafat (1803850)
 
 ## Requirements
 
